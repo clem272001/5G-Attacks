@@ -1,0 +1,11 @@
+step 1 : cleaned 109
+
+step 2/ tcp 112
+
+step 3 drop 105
+
+step 4 imputed 105
+
+step 5 encoded 135
+step6 filtered 
+step 7 scaled 93
