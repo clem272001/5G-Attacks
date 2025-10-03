@@ -8,7 +8,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from imblearn.over_sampling import SMOTE
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score, precision_recall_curve, average_precision_score
-
+from sklearn.metrics import mean_squared_error
 from sklearn.tree import export_graphviz
 # import graphviz
 
@@ -70,11 +70,12 @@ class DetectionRandomForest:
                                            n_neighbors=3, p= 1, weights= 'uniform')
         sm = SMOTE(random_state=42)
         X_res, y_res = sm.fit_resample(self.X_train, self.Y_train)
-
+        print(len(self.X_train.columns))
+        print(len(self.X_test.columns))
+        print(self.X_train.columns)
+        print(self.X_test.columns)
+        
         self.model.fit(X_res,y_res)#fit(self.X_train, self.Y_train)
-
-#----------------- Fonctions label et classification des anomalies -----------------# 
-
     
 
 #----------------- Metriques et performances -----------------# 
@@ -102,6 +103,25 @@ Réel -1 | TP   | FN  |
 Réel  1 | FP   | TN  |
 
 """
+def plot_mse_hist_log(train_mse, test_mse):
+    vals = [train_mse, test_mse]
+    labels = ["Train MSE", "Test MSE"]
+    colors = ["steelblue", "orange"]  # bleu / orange-rouge
+
+    fig, ax = plt.subplots(figsize=(7,4))
+    bars = ax.bar(labels, vals, color=colors)
+    ax.set_title("Comparison of Train vs Test MSE (log scale)")
+    ax.set_ylabel("MSE (log scale)")
+    ax.set_yscale('log')
+
+    # annotations
+    for b, v in zip(bars, vals):
+        ax.text(b.get_x() + b.get_width()/2, v,
+                f"{v:.3e}", ha='center', va='bottom', fontsize=9)
+
+    plt.tight_layout()
+    plt.show()
+
 
 #----------------- Main -----------------# 
 
@@ -115,21 +135,25 @@ if __name__ == "__main__":
 
     detection = DetectionRandomForest(df_train_csv, df_test_csv)#, parameters)
     #predit on the test data
-    Y_predit = detection.model.predict(detection.X_test)
+    Y_pred_test = detection.model.predict(detection.X_test)
     
     print("\nValeurs uniques dans Y_test :", np.unique(detection.Y_test))
     print(pd.Series(detection.Y_test).value_counts())
 
-    print("\nValeurs uniques dans Y_predit :", np.unique(Y_predit))
-    print(pd.Series(Y_predit).value_counts())
+    print("\nValeurs uniques dans Y_predit :", np.unique(Y_pred_test))
+    print(pd.Series(Y_pred_test).value_counts())
 
     #Evaluation du modèle
-    evaluate_predictions(detection.Y_test, Y_predit)
+    evaluate_predictions(detection.Y_test, Y_pred_test)
 
-#----------------- Création de la courbe Précision/Rappel et recherche du seuil optimal selon f1-score max -----------------# 
 
+# Verif MSE 
+    Y_pred_train = detection.model.predict(detection.X_train)
     
-
-
+    train_mse = mean_squared_error(detection.Y_train, Y_pred_train)
+    test_mse = mean_squared_error(detection.Y_test, Y_pred_test)
+    print(train_mse)
+    print(test_mse)
+    plot_mse_hist_log(train_mse, test_mse)
 
 

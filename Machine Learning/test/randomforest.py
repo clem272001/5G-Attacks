@@ -7,7 +7,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score, precision_recall_curve, average_precision_score, auc
-
+from sklearn.metrics import mean_squared_error
 from sklearn.tree import export_graphviz
 # import graphviz
 
@@ -57,14 +57,13 @@ class DetectionRandomForest:
 
         #Création de la colonne anomaly en fonction des labels présents dans ip.opt.time_stamp
         self.Y_test = self.df_test['ip.opt.time_stamp']
-
+        print(len(self.X_train.columns))
+        print(len(self.X_test.columns))
+        print(self.X_train.columns)
+        print(self.X_test.columns)
         #Création du modèle 
-        self.model = RandomForestClassifier(class_weight='balanced', max_depth= 10, max_features= 'sqrt', min_samples_split=2, n_estimators=100, random_state= 42)  # Parallélisation
+        self.model = RandomForestClassifier(class_weight='balanced', max_depth= 3, max_features= 'sqrt', min_samples_split=2, n_estimators=200, random_state= 42)  # Parallélisation
         self.model.fit(self.X_train, self.Y_train)
-
-#----------------- Fonctions label et classification des anomalies -----------------# 
-
-    
 
 #----------------- Metriques et performances -----------------# 
 
@@ -103,6 +102,27 @@ Réel  1 | FP   | TN  |
 
 """
 
+
+def plot_mse_hist_log(train_mse, test_mse):
+    vals = [train_mse, test_mse]
+    labels = ["Train MSE", "Test MSE"]
+    colors = ["steelblue", "orange"]  # bleu / orange-rouge
+
+    fig, ax = plt.subplots(figsize=(7,4))
+    bars = ax.bar(labels, vals, color=colors)
+    ax.set_title("Comparison of Train vs Test MSE (log scale)")
+    ax.set_ylabel("MSE (log scale)")
+    ax.set_yscale('log')
+
+    # annotations
+    for b, v in zip(bars, vals):
+        ax.text(b.get_x() + b.get_width()/2, v,
+                f"{v:.3e}", ha='center', va='bottom', fontsize=9)
+
+    plt.tight_layout()
+    plt.show()
+
+
 #----------------- Main -----------------# 
 
 if __name__ == "__main__":
@@ -115,65 +135,26 @@ if __name__ == "__main__":
 
     detection = DetectionRandomForest(df_train_csv, df_test_csv)#, parameters)
     #predit on the test data
-    Y_predit = detection.model.predict(detection.X_test)
+    Y_pred_test = detection.model.predict(detection.X_test)
     
     print("\nValeurs uniques dans Y_test :", np.unique(detection.Y_test))
     print(pd.Series(detection.Y_test).value_counts())
 
-    print("\nValeurs uniques dans Y_predit :", np.unique(Y_predit))
-    print(pd.Series(Y_predit).value_counts())
+    print("\nValeurs uniques dans Y_predit :", np.unique(Y_pred_test))
+    print(pd.Series(Y_pred_test).value_counts())
 
     #Evaluation du modèle
-    evaluate_predictions(detection.Y_test, Y_predit)
+    evaluate_predictions(detection.Y_test, Y_pred_test)
 
-#----------------- Création de la courbe ROC -----------------# 
-from sklearn.preprocessing import label_binarize
+# Verif MSE 
+    Y_pred_train = detection.model.predict(detection.X_train)
+    
+    train_mse = mean_squared_error(detection.Y_train, Y_pred_train)
+    test_mse = mean_squared_error(detection.Y_test, Y_pred_test)
+    print(train_mse)
+    print(test_mse)
+    plot_mse_hist_log(train_mse, test_mse)
 
-# Probabilités de toutes les classes
-y_score = detection.model.predict_proba(detection.X_test)
-y_true = detection.Y_test
-
-# Vérifier le nombre de classes
-classes = np.unique(y_true)
-
-if len(classes) == 2:
-    # ----- Cas binaire -----
-    y_proba = y_score[:, 1]  # proba pour la classe positive
-    fpr, tpr, thresholds = roc_curve(y_true, y_proba, pos_label=classes[1])
-    roc_auc = auc(fpr, tpr)
-
-    plt.figure()
-    plt.plot(fpr, tpr, color='blue', lw=2,
-             label=f"Random Forest (AUC = {roc_auc:.2f})")
-    plt.plot([0, 1], [0, 1], color='gray', linestyle='--')
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("Courbe ROC - Random Forest (Binaire)")
-    plt.legend(loc="lower right")
-    plt.show()
-
-else:
-    # ----- Cas multi-classes -----
-    y_test_bin = label_binarize(y_true, classes=classes)
-    n_classes = y_test_bin.shape[1]
-
-    fpr, tpr, roc_auc = {}, {}, {}
-
-    for i in range(n_classes):
-        fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], y_score[:, i])
-        roc_auc[i] = auc(fpr[i], tpr[i])
-
-    plt.figure()
-    for i in range(n_classes):
-        plt.plot(fpr[i], tpr[i], lw=2,
-                 label=f"Classe {classes[i]} (AUC = {roc_auc[i]:.2f})")
-
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("Courbes ROC - Random Forest (One-vs-Rest)")
-    plt.legend(loc="lower right")
-    plt.show()
 
 
 

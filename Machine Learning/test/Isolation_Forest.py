@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import (
-    confusion_matrix, precision_recall_curve, average_precision_score, f1_score
+    classification_report, confusion_matrix, precision_recall_curve, average_precision_score, f1_score
 )
-
+from sklearn.metrics import balanced_accuracy_score
 
 class DetectionIsolationForest:
     def __init__(self, df_train_csv, df_test_csv):
@@ -52,7 +52,10 @@ class DetectionIsolationForest:
             bootstrap= False, 
             max_features=0.5, max_samples=1500, n_estimators=50, n_jobs=-1, random_state= 42, verbose= 0, warm_start=False
         )
-
+        print(len(self.X_train.columns))
+        print(len(self.X_test.columns))
+        print(self.X_train.columns)
+        print(self.X_test.columns)
         self.model.fit(self.X_train)
 
     #----------------- Fonctions labels -----------------#
@@ -99,6 +102,9 @@ def evaluate_predictions(y_true, y_pred):
     print(f"Precision: {precision:.6f}")
     print(f"Recall   : {recall:.6f}")
     print(f"F1 Score : {f1:.6f}")
+    print(classification_report(y_true, y_pred, digits=4, labels=[-1, 1], zero_division=0))
+    bal_acc = balanced_accuracy_score(y_true, y_pred)
+    print("Balanced accuracy: ",bal_acc)
     return cm, precision, recall, f1
 
 
@@ -146,14 +152,14 @@ if __name__ == "__main__":
     plt.plot(thresholds, recall[:-1], label='Recall', color='orange')
     plt.axvline(x=best_threshold, color='red', linestyle='--',
                 label=f'Optimal threshold = {best_threshold:.4f}')
-    plt.xlabel("Threshold",fontsize=25)
-    plt.ylabel("Score", fontsize=25)
+    plt.xlabel("Threshold",fontsize=40)
+    plt.ylabel("Score", fontsize=40)
     #plt.title("Precision/Recall Evolution as a Function of Threshold")
-    plt.xticks(fontsize=30)
-    plt.yticks(fontsize=30)
+    plt.xticks(fontsize=35)
+    plt.yticks(fontsize=35)
 
     # Legend
-    plt.legend(fontsize=22,loc='upper right')
+    plt.legend(fontsize=28,loc='upper right')
     plt.grid(True)
     plt.show()
 

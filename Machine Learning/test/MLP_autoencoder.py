@@ -4,12 +4,12 @@ from torchvision.ops import MLP
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, random_split
 import torch.optim as optim
-from sklearn.metrics import roc_auc_score, f1_score, precision_score, recall_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import classification_report, roc_auc_score, f1_score, precision_score, recall_score, confusion_matrix, ConfusionMatrixDisplay
 import numpy as np
 import matplotlib.pyplot as plt
 import random
 from sklearn.metrics import accuracy_score
-
+from sklearn.metrics import balanced_accuracy_score
 # ---------------------------
 # Déterminisme
 # ---------------------------
@@ -19,7 +19,7 @@ np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
 
-# pour forcer PyTorch en mode déterministe (si tu veux vraiment reproductible)
+# pour forcer PyTorch en mode déterministe (reproductible)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
@@ -29,16 +29,17 @@ torch.backends.cudnn.benchmark = False
 class MLPAutoencoder(nn.Module):
     def __init__(self, input_dim: int, latent_dim: int = 8, p_drop: float = 0.1):
         super().__init__()
+        print(latent_dim)
         self.encoder = MLP(
             in_channels=input_dim,
-            hidden_channels=[128, 64, 32, latent_dim],
+            hidden_channels=[64, 16, latent_dim],
             activation_layer=nn.LeakyReLU,
             dropout=p_drop
         )
         self.enc_bn = nn.BatchNorm1d(latent_dim)  # OK même si batch>1
         self.decoder = MLP(
             in_channels=latent_dim,
-            hidden_channels=[32, 64, 128, input_dim],
+            hidden_channels=[16, 64, input_dim],
             activation_layer=nn.LeakyReLU,
             dropout=p_drop
         )
@@ -52,7 +53,6 @@ class MLPAutoencoder(nn.Module):
 # ---------------------------
 # Chargement des données
 # ---------------------------
-# Fichiers déjà scalés d'après ton message
 df_train = pd.read_csv("dataset_1_scaled.csv", sep=';')
 df_test  = pd.read_csv("dataset_3_scaled.csv", sep=';')
 
@@ -60,11 +60,18 @@ df_test  = pd.read_csv("dataset_3_scaled.csv", sep=';')
 cols_to_drop = ["ip.opt.time_stamp", "frame.number"]
 
 # X (train sain)
-X_train = df_train.drop(columns=cols_to_drop, errors="ignore").select_dtypes(include="number").values
-# X (test mixte)
-X_test  = df_test.drop(columns=cols_to_drop, errors="ignore").select_dtypes(include="number").values
+X_train_df = df_train.drop(columns=cols_to_drop, errors="ignore").select_dtypes(include="number")
+X_test_df  = df_test.drop(columns=cols_to_drop, errors="ignore").select_dtypes(include="number")
 
-# y (test) : ici tu utilises "ip.opt.time_stamp" comme label (NaN = normal, sinon 0..7)
+print(len(X_train_df.columns))
+print(len(X_test_df.columns))
+print(X_train_df.columns)
+print(X_test_df.columns)
+
+# Conversion en numpy seulement après vérification des colonnes
+X_train = X_train_df.values
+X_test  = X_test_df.values
+# y (test) : "ip.opt.time_stamp" comme label (NaN = normal, sinon 0..7)
 y_test_raw = df_test["ip.opt.time_stamp"]  # garde pandas Series
 y_test = y_test_raw.fillna(-1).astype(int).values
 y_true = (y_test != -1).astype(int)  # 0=normal, 1=attaque
@@ -157,7 +164,7 @@ if best_state is not None:
     model.load_state_dict(best_state)
 
 # ---------------------------
-# Évaluation (erreurs MAE)
+# Évaluation 
 # ---------------------------
 model.eval()
 reconstruction_errors = []
@@ -175,7 +182,7 @@ errors = np.nan_to_num(errors, posinf=np.finfo(np.float32).max)
 # Choix du seuil (grid de percentiles sur les normaux)
 # ---------------------------
 normal_errors = errors[y_true == 0]
-# Sécurité si pas de normaux dans y_true (rare mais possible)
+
 if normal_errors.size == 0:
     normal_errors = errors
 
@@ -200,13 +207,15 @@ print("Accuracy:", accuracy_score(y_true, y_pred))
 print("F1:", f1_score(y_true, y_pred))
 print("Précision:", precision_score(y_true, y_pred))
 print("Rappel:", recall_score(y_true, y_pred))
+bal_acc = balanced_accuracy_score(y_true, y_pred)
+print("Balanced accuracy: ",bal_acc)
 
 # ---------------------------
 # Confusion Matrix
 # ---------------------------
 cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
 print("Confusion Matrix :\n", cm)
-
+print(classification_report(y_true, y_pred, digits=4, labels=[0, 1], zero_division=0))
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Normal", "Anomalie"])
 disp.plot(cmap="Blues", values_format="d")
 plt.title("Confusion Matrix (Autoencoder MLP)")
