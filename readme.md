@@ -93,7 +93,7 @@ The preprocessing pipeline (`Data preparation/preparation/`) consists of 7 seque
 | 6 | `step6_correlation_filtering.py` | Pearson correlation filtering. |
 | 7 | `step7_z_score_normalization.py` | Normalization of features (z-score). |
 
-To run the full preprocessing pipeline (from the repository root):
+To run the full preprocessing pipeline :
 
 ```bash
 cd "Data preparation/preparation"
@@ -105,30 +105,22 @@ chmod +x pipeline.sh   # optional: make pipeline executable
 
 ## Intrusion Detection Systems
 
-The `Intrusion Detection Systems` folder contains preprocessed datasets, model implementations and evaluation artifacts used to train and evaluate anomaly/classification models.
+The Datasets directory contains all the raw and processed traffic data used for building the intrusion detection datasets.
 
 - `dataset_1_final.csv`, `dataset_2_final.csv`, `dataset_3_final.csv`  
   Final, cleaned, labeled and preprocessed CSV files used as inputs for training and evaluation of the models.
 
 - `Isolation_Forest.py`  
-  Unsupervised anomaly detection implementation using an isolation-forest approach.
+  Isolation-forest approach.
 
 - `randomforest.py`  
-  Supervised Random Forest classifier—trains on labeled data and outputs performance metrics.
+  Random Forest classifier.
 
 - `KNN.py`  
-  k-NN baseline classifier.
+  K-Nearest Neighbors
 
 - `MLP_autoencoder.py`  
-  Neural autoencoder for reconstruction-based anomaly detection.
+  Multi Layer Perceptron autoencoder.
 
-- `Figure_iso_macro.png`  
-  Example figure showing macro-averaged Precision–Recall results (used for threshold selection).
 
 ---
-
-## Notes & Requirements
-
-- Make sure `tshark` is installed and accessible in your environment (`sudo apt install tshark`).  
-- Python dependencies: `pandas`, `numpy`, `scikit-learn`, `matplotlib`, `scipy`. Check script headers for exact requirements.  
-- Several rules in `Label.py` depend on hard-coded filenames and IPs — update them if your experimental setup changes.
