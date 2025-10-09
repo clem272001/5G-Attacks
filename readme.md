@@ -65,7 +65,7 @@ Each dataset folder (`Dataset_1`, `Dataset_2`, `Dataset_3`) includes:
 
 | Label | Scenario (short)                                  | Flagging condition (what the script checks)                                                                                                    |
 |------:|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| **0** | PFCP Flooding — *Denial of Service*               | `float(ip.hdr_len) > 20` **and** input filename == `capture_2_pfcp-DoS.csv`. Writes `0` to `ip.opt.time_stamp`.                                |
+| **0** | PFCP Flooding — *Denial of Service*               | `ip.hdr_len > 20` **and** input filename == `capture_2_pfcp-DoS.csv`. Writes `0` to `ip.opt.time_stamp`.                                |
 | **1** | PFCP Deletion — *Denial of Service*               | `ip.hdr_len > 20` **and** filename == `capture2_pfcp_Deletion.csv`. Writes `1`.                                                               |
 | **2** | PFCP Modification — *Denial of Service*           | `ip.hdr_len > 20` **and** filename == `capture2_pfcp_Modification.csv`. Writes `2`.                                                           |
 | **3** | NMAP Scan — *Reconnaissance*                      | `ip.hdr_len` missing or `<= 20` **and** `ip.src` is `192.168.14.187` or `192.168.14.149`. Writes `3`. (Detects known scanner IPs.)             |
