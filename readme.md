@@ -65,11 +65,11 @@ Each dataset folder (`Dataset_1`, `Dataset_2`, `Dataset_3`) includes:
 
 | Label | Scenario (short)                                  | Flagging condition (what the script checks)                                                                                                    |
 |------:|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| **0** | PFCP Flooding — *Denial of Service*               | `ip.hdr_len > 20` **and** input filename == `capture_2_pfcp-DoS.csv`. Writes `0` to `ip.opt.time_stamp`.                                       |
-| **1** | PFCP Deletion — *Denial of Service*               | `ip.hdr_len > 20` **and** filename == `capture2_pfcp_Deletion.csv`. Writes `1`.                                                                |
-| **2** | PFCP Modification — *Denial of Service*           | `ip.hdr_len > 20` **and** filename == `capture2_pfcp_Modification.csv`. Writes `2`.                                                            |
-| **3** | NMAP Scan — *Reconnaissance*                      | `ip.hdr_len` missing or `<= 20` **and** `ip.src` is `192.168.14.187` or `192.168.14.149`. Writes `3`. (Detects known IPs.(for both datasets))  |
-| **4** | Reverse Shell — *Lateral movement*                | `ip.hdr_len` missing or `<= 20` **and** `ip.src` is `172.19.41.11` or `172.19.41.9`. Writes `4`. (Source IPs identified as compromised hosts.) |
+| **0** | PFCP Flooding — *Denial of Service*               | `ip.hdr_len > 20` **and** input filename == `capture_*_pfcp-DoS.csv`. Writes `0` to `ip.opt.time_stamp`.                                       |
+| **1** | PFCP Deletion — *Denial of Service*               | `ip.hdr_len > 20` **and** filename == `capture*_pfcp_Deletion.csv`. Writes `1`.                                                                |
+| **2** | PFCP Modification — *Denial of Service*           | `ip.hdr_len > 20` **and** filename == `capture*_pfcp_Modification.csv`. Writes `2`.                                                            |
+| **3** | NMAP Scan — *Reconnaissance*                      | `ip.src` is `192.168.14.187` or `192.168.14.149`. Writes `3`. (Detects known IPs.(for both datasets))  |
+| **4** | Reverse Shell — *Lateral movement*                | `ip.src` is `172.19.41.11` or `172.19.41.9`. Writes `4`. (Source IPs identified as compromised hosts.) |
 | **5** | UPF PDN-0 Fault — *Denial of Service*             | `ip.hdr_len > 20` **and** filename contains substring `capture_pdn`. Writes `5`.                                                               |
 | **6** | PFCP Restoration - TEID DoS — *Denial of Service* | filename contains `cve` **and** `pfcp.f_teid.teid` exists and parsed as hex > `65536`. Writes `6`.                                             |
 
