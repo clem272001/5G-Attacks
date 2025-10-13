@@ -65,9 +65,12 @@ The output of the command will be:
 
 # PFCP Modification attack
 
-Run the bash code `modification.sh` with the number of desired target as argument. 
- 
- 
+Run the bash code `modification.sh` with the number or desired target as argument. 
+
+# PFCP Modification attack
+
+Run the python code `pfcp-Session-deletion-flag.py` with SMF_IP UPF_IP interface
+
 # UPF  PDN-0  Fault
 
 Change smf_ip & upf_ip in the script and run python3 pfcp-pdn.py
