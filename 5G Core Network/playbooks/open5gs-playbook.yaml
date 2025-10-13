@@ -1,0 +1,84 @@
+---
+- name: Setup open5gs core network
+  hosts: master_nodes
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  vars:
+   helm_chart_url: "registry-1.docker.io/gradiant/open5gs"
+  tasks:
+    - name: Remove generated ubuntu hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: "ubuntu-*"
+        state: absent
+        backup: yes
+
+    - name: Remove generated hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: ".* {{ hostvars[item]['ansible_hostname']}} {{ hostvars[item]['ansible_hostname']}}"
+        state: absent
+        backup: yes
+      loop: "{{ ansible_play_batch }}"
+
+    - name: Update hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: ".*\t{{ hostvars[item]['ansible_hostname']}}\t{{ hostvars[item]['ansible_hostname']}}$"
+        line: "{{ hostvars[item]['ansible_ssh_host'] }}\t{{ hostvars[item]['ansible_hostname']}}\t{{ hostvars[item]['ansible_hostname']}}.local"
+        state: present
+        backup: yes
+      loop: "{{ ansible_play_batch }}"
+    - name: Download Helm installer script
+      become: true
+      command: "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+      
+    - name: Set executable permissions for Helm installer script
+      become: true
+      file:
+        path: get_helm.sh
+        mode: "u+x"
+
+    - name: Run Helm installer script
+      become: true
+      command: "./get_helm.sh"
+
+    - name: Install open5gs
+      kubernetes.core.helm:
+        chart_ref: oci://registry-1.docker.io/gradiant/open5gs
+        chart_version: 2.2.2
+        release_namespace: default
+        release_name: open5gs
+      environment:
+        KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+    - name: Install ueransim-gnb
+      kubernetes.core.helm:
+        chart_ref: oci://registry-1.docker.io/gradiant/ueransim-gnb
+        chart_version: 0.2.6
+        release_namespace: default
+        release_name: ueransim-gnb
+        values:
+          sd: null
+      environment:
+        KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+    - name: Copier le fichier values.yaml
+      copy:
+        src: files/ues-values.yaml
+        dest: ues-values.yaml
+
+
+    - name: Install ueransim-ues
+      kubernetes.core.helm:
+        chart_ref: oci://registry-1.docker.io/gradiant/ueransim-ues
+        chart_version: 0.1.2
+        release_namespace: default
+        release_name: ueransim-ues
+        values_files:
+          - ues-values.yaml
+        values:
+          sd: null
+      environment:
+        KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
