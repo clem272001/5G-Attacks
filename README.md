@@ -71,7 +71,7 @@ Each dataset folder (`Dataset_1`, `Dataset_2`, `Dataset_3`) includes:
 | **3** | NMAP Scan — *Reconnaissance*                      | `ip.src` is `192.168.14.187` or `192.168.14.149`. Writes `3`. (Detects known IPs.(for both datasets))  |
 | **4** | Reverse Shell — *Lateral movement*                | `ip.src` is `172.19.41.11` or `172.19.41.9`. Writes `4`. (Source IPs identified as compromised hosts.) |
 | **5** | UPF PDN-0 Fault — *Denial of Service*             | `ip.hdr_len > 20` **and** filename contains substring `capture_pdn`. Writes `5`.                                                               |
-| **6** | PFCP Restoration - TEID DoS — *Denial of Service* | filename contains `cve` **and** `pfcp.f_teid.teid` exists and parsed as hex > `65536`. Writes `6`.                                             |
+| **6** | PFCP Restoration - TEID DoS — *Denial of Service* | filename contains `cve` **and** `pfcp.f_teid.teid` exists and > `1024 * 4 * 16`. Writes `6`.                                                   |
 
 **Feature extraction**
 - The script `Datasets/data_preparation_csv_files.sh` automates the extraction process.
