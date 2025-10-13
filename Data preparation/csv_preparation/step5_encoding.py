@@ -59,7 +59,7 @@ non_num_cols = sorted(set(non_num_attack).union(set(non_num_saine)).union(set(no
 # Nettoyage : on retire les colonnes déjà frequency-encodées, spéciales et temporelles
 non_num_cols = [col for col in non_num_cols if col not in freq_cols and col not in special_columns and col not in time_columns]
 
-# 🔥 Plan B : forcer la conversion des colonnes object qui sont en réalité numériques
+# forcer la conversion des colonnes object qui sont en réalité numériques
 fake_num_cols = []
 for col in list(non_num_cols):
     try:
