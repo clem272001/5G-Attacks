@@ -3,10 +3,7 @@
 ---
 
 ## Repository Structure
-<<<<<<< HEAD
-=======
 
->>>>>>> 77247f26a77aeaa000a9035d86f474cca632ee67
 ```
 ├── Datasets
 │   ├── Dataset_1
