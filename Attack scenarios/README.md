@@ -67,7 +67,7 @@ The output of the command will be:
 
 Run the bash code `modification.sh` with the number or desired target as argument. 
 
-# PFCP Modification attack
+# PFCP Deletion attack
 
 Run the python code `pfcp-Session-deletion-flag.py` with SMF_IP UPF_IP interface
 
