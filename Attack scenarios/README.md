@@ -65,7 +65,7 @@ The output of the command will be:
 
 # PFCP Modification attack
 
-Run the bash code `modification.sh` with the number or desired target as argument. 
+Run the bash code `modification.sh` with the number of desired target as argument. 
 
 # PFCP Deletion attack
 
