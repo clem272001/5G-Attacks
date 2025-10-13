@@ -58,7 +58,7 @@ Each dataset folder (`Dataset_1`, `Dataset_2`, `Dataset_3`) includes:
 - A `dataset_*.csv` file generated from feature extraction and CSV preparation/labeling.
 
 **CSV preparation and labeling**
-- `Label.py` → assigns attack labels. All labels are written into the `ip.opt.time_stamp` field. If no rule applies the row is kept unchanged.
+- `Label.py` → assigns attack labels. All labels are written into the `ip.opt.time_stamp` field. If no rule applies, the row is kept unchanged.
 - `fusionner.py` → merges multiple CSV files from different captures (e.g., distinct attack scenarios).
 
 **Label legend and how each scenario is flagged (written to `ip.opt.time_stamp`)**
