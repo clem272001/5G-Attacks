@@ -75,7 +75,7 @@ Change smf_ip & upf_ip in the script and run python3 pfcp-pdn.py
 
 # PFCP  Restoration-TEID
 
-This attack is a reproduction of the CVE-2025-29646, see https://nvd.nist.gov/vuln/detail/CVE-2025-29646 for more informations.
+This attack is a reproduction of the CVE-2025-29646, see https://nvd.nist.gov/vuln/detail/CVE-2025-29646, https://github.com/open5gs/open5gs/issues/3747 for more informations.
 
 ## Steps to reproduce
 
