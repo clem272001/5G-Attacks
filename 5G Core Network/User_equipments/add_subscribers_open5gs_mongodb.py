@@ -30,7 +30,8 @@ def new_subscriber(nbr_sub):
         "operator_determined_barring": 0,
         "network_access_mode": 0,
         "subscribed_rau_tau_timer": 12,
-        "imsi": "9997"+"0"*(11-len(str(nbr_sub)))+str(nbr_sub+1),
+        "imsi": "999700000000" + str(nbr_sub).zfill(3)
+        #"imsi": "9997"+"0"*(11-len(str(nbr_sub)))+str(nbr_sub+1),
         "security": {
             "k": "465B5CE8 B199B49F AA5F0A2E E238A6BC",
             "amf": "8000",
